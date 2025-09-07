@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Life Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f9fb;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .goal-stamp {
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      color: white;
+      font-size: 1.2em;
+      text-align: center;
+    }
+    .goal-stamp.green { background: #4caf50; }
+    .goal-stamp.yellow { background: #ffb300; }
+    .goal-stamp.red { background: #e53935; }
+    .goal-stamp.grey { background: #9e9e9e; }
+
+    .task-list {
+      background: white;
+      border-radius: 10px;
+      margin: 10px 0 20px 0;
+      padding: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      display: none;
+    }
+    ul { list-style: none; padding: 0; }
+    li {
+      margin: 6px 0;
+      padding: 6px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f1f3f6;
+    }
+    li span { flex: 1; }
+    li button {
+      margin-left: 10px;
+      padding: 4px 8px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🌞 Personal Life Tracker</h1>
+
+  <!-- Add Goal Form -->
+  <form id="add-goal-form" style="margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); max-width: 400px; margin-left: auto; margin-right: auto;">
+    <label for="goal-title">Add New Goal:</label>
+    <input type="text" id="goal-title" name="goal-title" placeholder="Goal Title" required style="margin: 0 10px; padding: 6px; border-radius: 6px; border: 1px solid #ccc;">
+    <button type="submit" style="background: #4caf50; color: white; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer;">Add Goal</button>
+  </form>
+
+  <div id="dashboard"></div>
+
+  <script>
+    // Example Data
+    let goals = [
+      {
+        title: "Health",
+        tasks: [
+          { name: "Morning Walk", status: "green" },
+          { name: "Drink 2L Water", status: "yellow" },
+          { name: "Breathing Exercise", status: "grey" }
+        ]
+      },
+      {
+        title: "Career",
+        tasks: [
+          { name: "Submit Report", status: "green" },
+          { name: "Finish Online Course", status: "green" }
+        ]
+      },
+      {
+        title: "Family",
+        tasks: [
+          { name: "Call Parents", status: "red" },
+          { name: "Family Dinner Plan", status: "grey" }
+        ]
+      },
+      {
+        title: "TSF",
+        tasks: [
+          { name: "Task1", status: "red" },
+          { name: "Task2", status: "grey" }
+        ]
+      },
+      {
+        title: "Panjtan School",
+        tasks: [
+          { name: "Task1", status: "red" },
+          { name: "Task2", status: "grey" }
+        ]
+      }
+
+    ];
+
+    function calculateGoalStatus(tasks) {
+      if (tasks.some(t => t.status === "red")) return "red";
+      if (tasks.some(t => t.status === "yellow")) return "yellow";
+      if (tasks.every(t => t.status === "green")) return "green";
+      return "grey";
+    }
+
+    function renderDashboard() {
+      const dashboard = document.getElementById("dashboard");
+      dashboard.innerHTML = "";
+
+      goals.forEach((goal, gIndex) => {
+        const goalStatus = calculateGoalStatus(goal.tasks);
+
+        const goalDiv = document.createElement("div");
+
+        const stamp = document.createElement("div");
+        stamp.className = `goal-stamp ${goalStatus}`;
+        stamp.textContent = goal.title;
+
+        const taskList = document.createElement("div");
+        taskList.className = "task-list";
+
+        const ul = document.createElement("ul");
+        goal.tasks.forEach((task, tIndex) => {
+          const li = document.createElement("li");
+          li.innerHTML = `<span>${task.name}</span>`;
+
+          const completeBtn = document.createElement("button");
+          completeBtn.textContent = "Done";
+          completeBtn.style.background = "#4caf50";
+          completeBtn.style.color = "white";
+          completeBtn.onclick = () => {
+            goals[gIndex].tasks[tIndex].status = "green";
+            renderDashboard();
+          };
+
+          const pendingBtn = document.createElement("button");
+          pendingBtn.textContent = "Pending";
+          pendingBtn.style.background = "#ffb300";
+          pendingBtn.style.color = "white";
+          pendingBtn.onclick = () => {
+            goals[gIndex].tasks[tIndex].status = "yellow";
+            renderDashboard();
+          };
+
+          const overdueBtn = document.createElement("button");
+          overdueBtn.textContent = "Overdue";
+          overdueBtn.style.background = "#e53935";
+          overdueBtn.style.color = "white";
+          overdueBtn.onclick = () => {
+            goals[gIndex].tasks[tIndex].status = "red";
+            renderDashboard();
+          };
+
+          li.appendChild(completeBtn);
+          li.appendChild(pendingBtn);
+          li.appendChild(overdueBtn);
+          ul.appendChild(li);
+        });
+
+        taskList.appendChild(ul);
+
+        // Add Task Form for this goal
+        const addTaskForm = document.createElement("form");
+        addTaskForm.style.marginTop = "10px";
+        addTaskForm.innerHTML = `
+          <input type="text" name="task-name" placeholder="Add new task" required style="padding: 6px; border-radius: 6px; border: 1px solid #ccc; margin-right: 8px;">
+          <select name="task-status" style="padding: 6px; border-radius: 6px; border: 1px solid #ccc; margin-right: 8px;">
+            <option value="grey">Not Started</option>
+            <option value="green">Done</option>
+            <option value="yellow">Pending</option>
+            <option value="red">Overdue</option>
+          </select>
+          <button type="submit" style="background: #2196f3; color: white; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer;">Add Task</button>
+        `;
+        addTaskForm.onsubmit = function(e) {
+          e.preventDefault();
+          const taskName = addTaskForm.elements["task-name"].value.trim();
+          const taskStatus = addTaskForm.elements["task-status"].value;
+          if (taskName) {
+            goals[gIndex].tasks.push({ name: taskName, status: taskStatus });
+            renderDashboard();
+          }
+        };
+        taskList.appendChild(addTaskForm);
+
+        stamp.onclick = () => {
+          taskList.style.display = taskList.style.display === "block" ? "none" : "block";
+        };
+
+        goalDiv.appendChild(stamp);
+        goalDiv.appendChild(taskList);
+        dashboard.appendChild(goalDiv);
+      });
+    }
+
+    // Handle Add Goal Form
+    document.getElementById("add-goal-form").onsubmit = function(e) {
+      e.preventDefault();
+      const goalTitle = document.getElementById("goal-title").value.trim();
+      if (goalTitle) {
+        goals.push({ title: goalTitle, tasks: [] });
+        document.getElementById("goal-title").value = "";
+        renderDashboard();
+      }
+    };
+
+    renderDashboard();
+  </script>
+</body>
+</html>
