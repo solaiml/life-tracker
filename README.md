@@ -1,2 +1,2 @@
 # life-tracker
-life tracker
+life tracker application 
